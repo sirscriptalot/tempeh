@@ -1,0 +1,30 @@
+%YAML 1.2
+---
+name: Tempeh
+file_extensions:
+  - tempeh
+scope: text.html
+contexts:
+  main:
+    - match: ''
+      push: 'scope:text.html.basic'
+      with_prototype:
+        - match: "%\\s*#"
+          push:
+            - meta_scope: comment.block
+            - match: "%"
+              pop: true
+
+        - match: "%"
+          push:
+            - meta_scope: tempeh.expression.block
+            - match: "%"
+              pop: true
+            - include: 'scope:source.ruby'
+
+        - match: "{"
+          push:
+            - meta_scope: tempeh.expression.string
+            - match: "}"
+              pop: true
+            - include: 'scope:source.ruby'
