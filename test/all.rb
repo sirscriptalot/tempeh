@@ -21,6 +21,11 @@ test do |t|
 
   assert_equal "Hello", template.render
 
+  # escapes string expressions
+  template = Tempeh.new(%q({ %q(<>&"') }))
+
+  assert_equal "&lt;&gt;&amp;&#39;&#34;", template.render
+
   # nil string expressions
   template = Tempeh.new("{ nil }")
 

@@ -19,7 +19,7 @@ class Tempeh
     ">" => "&gt;",
     "<" => "&lt;",
     '"' => "&#39;",
-    "'" => "&#34;"
+    "'" => "&#34;",
   }.freeze
 
   UNSAFE = /[&"'><]/
@@ -32,7 +32,7 @@ class Tempeh
       while (term = terms.shift)
         case term
         when BLK_OPEN then parts << terms.shift << "\n"
-        when STR_OPEN then parts << "__o << Tempeh.escape(" << terms.shift << ") \n"
+        when STR_OPEN then parts << "__o << Tempeh.escape((" << terms.shift << ").to_s)\n"
         else               parts << "__o << " << term.dump << "\n"
         end
       end
@@ -42,8 +42,8 @@ class Tempeh
       eval(parts)
     end
 
-    def escape(val)
-      val.to_s.gsub(UNSAFE, HTML_ESCAPE)
+    def escape(str)
+      str.gsub(UNSAFE, HTML_ESCAPE)
     end
   end
 
