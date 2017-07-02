@@ -1,49 +1,56 @@
 require_relative '../lib/tempeh'
 
-test do |t|
-  # empty lines
+test 'empty lines' do
   template = Tempeh.new("\n\n \n")
 
   assert_equal "\n\n \n", template.render
+end
 
-  # quotes
+test 'quotes' do
   template = Tempeh.new("'foo' 'bar' 'baz'")
 
   assert_equal "'foo' 'bar' 'baz'", template.render
+end
 
-  # block expressions
+test 'block expressions' do
   template = Tempeh.new("% if true %yes% else %no% end %")
 
   assert_equal "yes", template.render
+end
 
-  # string expressions
+test 'string expressions' do
   template = Tempeh.new("{ 'Hello' }")
 
   assert_equal "Hello", template.render
+end
 
-  # escapes string expressions
+test 'escapes string expressions' do
   template = Tempeh.new(%q({ %q(<>&"') }))
 
   assert_equal "&lt;&gt;&amp;&#39;&#34;", template.render
+end
 
-  # nil string expressions
+test 'nil string expressions' do
   template = Tempeh.new("{ nil }")
 
   assert_equal "", template.render
+end
 
-  # allows escaping expressions
+test 'allows escaping expressions' do
   template = Tempeh.new('\{ nil }\% hello %')
 
   assert_equal '\{ nil }\% hello %', template.render
+end
 
-  # render with context
+test 'render with context' do
   context = Struct.new(:foo).new('bar')
 
   template = Tempeh.new("{ foo }")
 
   assert_equal "bar", template.render(context)
+end
 
-  # render with args
+test 'render with args' do
   template = Tempeh.new("{ args[:foo] }")
 
   assert_equal "bar", template.render(foo: "bar")
