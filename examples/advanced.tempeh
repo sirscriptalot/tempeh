@@ -1,0 +1,14 @@
+% # this is a comment %
+
+% if true %
+  {{ 'hello world' }}
+% end %
+
+% # multiline blocks work as well %
+% [
+  'foo',
+  'bar',
+].each do |word| %
+  {{& word }} % # word will not be escaped %
+% end %
+

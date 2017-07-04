@@ -1,17 +1,22 @@
-class Tempeh
-  VERSION = "0.1.0"
+module Tempeh
+  VERSION = "0.2.0"
 
-  BLK_OPEN = '%'
+  BLK_OPEN = "%"
 
-  BLK_CLOSE = '%'
+  BLK_CLOSE = "%"
 
-  STR_OPEN = '{'
+  RAW_OPEN = "{{&"
 
-  STR_CLOSE = '}'
+  RAW_CLOSE = "}}"
+
+  STR_OPEN = "{{"
+
+  STR_CLOSE = "}}"
 
   PATTERN = /
-    (?<!\\)(#{BLK_OPEN})\s+(.*?)\s+#{BLK_CLOSE} | # Multiline Ruby blocks.
-    (?<!\\)(#{STR_OPEN})(.*?)#{STR_CLOSE}         # Ruby to be evaluated a string.
+    (?<!\\)(#{BLK_OPEN})\s+(.*?)\s+#{BLK_CLOSE} | # Multiline blocks.
+    (?<!\\)(#{RAW_OPEN})(.*?)#{RAW_CLOSE}       | # Evaluated as a string, unescaped
+    (?<!\\)(#{STR_OPEN})(.*?)#{STR_CLOSE}         # Evaluated as a string, escaped.
   /mx
 
   HTML_ESCAPE = {
@@ -19,25 +24,30 @@ class Tempeh
     ">" => "&gt;",
     "<" => "&lt;",
     '"' => "&#39;",
-    "'" => "&#34;",
+    "'" => "&#34;"
   }.freeze
 
   UNSAFE = /[&"'><]/
 
   class << self
+    def cache
+      @cache ||= {}
+    end
+
     def compile(str)
       terms = str.split(PATTERN)
-      parts = "proc do |args = {}, __o = ''|"
+      parts = "proc { __o = '';"
 
       while (term = terms.shift)
         case term
-        when BLK_OPEN then parts << terms.shift << "\n"
-        when STR_OPEN then parts << "__o << Tempeh.escape((" << terms.shift << ").to_s)\n"
-        else               parts << "__o << " << term.dump << "\n"
+        when BLK_OPEN then parts << "#{terms.shift}\n"
+        when RAW_OPEN then parts << "__o << (#{terms.shift}).to_s\n"
+        when STR_OPEN then parts << "__o << Tempeh.escape((#{terms.shift}).to_s)\n"
+        else               parts << "__o << #{term.dump}\n"
         end
       end
 
-      parts << "__o; end"
+      parts << "__o; }"
 
       eval(parts)
     end
@@ -47,11 +57,13 @@ class Tempeh
     end
   end
 
-  def initialize(str)
-    @code = Tempeh.compile(str)
-  end
+  module Helpers
+    def render(path)
+      instance_eval &tempeh_template_for(path)
+    end
 
-  def render(context = nil, **args)
-    context.instance_exec(args, &@code)
+    def tempeh_template_for(path)
+      Tempeh.cache[path] ||= Tempeh.compile(File.read(path))
+    end
   end
 end

@@ -17,14 +17,22 @@ contexts:
 
         - match: "%"
           push:
-            - meta_scope: tempeh.expression.block
+            - meta_scope: punctuation.section.braces
             - match: "%"
               pop: true
             - include: 'scope:source.ruby'
 
-        - match: "{"
+        - match: "{{&"
           push:
-            - meta_scope: tempeh.expression.string
-            - match: "}"
+            - meta_scope: punctuation.section.braces
+            - match: "}}"
+              pop: true
+            - include: 'scope:source.ruby'
+
+
+        - match: "{{"
+          push:
+            - meta_scope: punctuation.section.braces
+            - match: "}}"
               pop: true
             - include: 'scope:source.ruby'
