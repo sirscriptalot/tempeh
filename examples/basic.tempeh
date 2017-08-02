@@ -1,1 +1,7 @@
-% 3.times do %{{ name }}% end %
+%
+  # Compiled templates accept a single (optional) argument "args".
+  # This is useful for providing extra data that isn't bound
+  # to the evaluating context.
+%
+
+% 3.times do %{{ args[:name] || name }}% end %

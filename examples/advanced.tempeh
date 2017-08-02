@@ -4,7 +4,6 @@
   {{ 'hello world' }}
 % end %
 
-% # multiline blocks work as well %
 % [
   'foo',
   'bar',

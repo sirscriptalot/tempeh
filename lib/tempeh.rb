@@ -1,5 +1,5 @@
 module Tempeh
-  VERSION = "0.2.0"
+  VERSION = "0.3.0"
 
   BLK_OPEN = "%"
 
@@ -36,7 +36,8 @@ module Tempeh
 
     def compile(str)
       terms = str.split(PATTERN)
-      parts = "proc { __o = '';"
+
+      parts = "proc { |args| __o = '';"
 
       while (term = terms.shift)
         case term
@@ -57,9 +58,18 @@ module Tempeh
     end
   end
 
+  def test
+    b = binding
+    p = proc { b.eval("a = 22") }
+    p.call
+    puts a
+  end
+
   module Helpers
-    def render(path)
-      instance_eval &tempeh_template_for(path)
+    DEFAULT_ARGS = {}.freeze
+
+    def render(path, args = DEFAULT_ARGS)
+      instance_exec args, &tempeh_template_for(path)
     end
 
     def tempeh_template_for(path)

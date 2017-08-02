@@ -49,6 +49,12 @@ test 'contextual rendering' do
   assert_equal "bar", context.instance_eval(&template)
 end
 
+test 'passes optional `args` variable' do
+  template = Tempeh.compile("{{ args[:foo] }}")
+
+  assert_equal "bar", instance_exec({ foo: "bar" }, &template)
+end
+
 class View
   include Tempeh::Helpers
 
@@ -66,11 +72,13 @@ setup do
 end
 
 test 'helpers' do |view|
-  path = './test/basic.tempeh'
+  path = './examples/basic.tempeh'
 
   assert Tempeh.cache[path].nil?, 'template is already cached'
 
-  assert_equal 'stevestevesteve', view.render('./examples/basic.tempeh')
+  assert_equal "\n\nstevestevesteve", view.render(path)
 
   assert Tempeh.cache[path], 'template was not cached'
+
+  assert_equal "\n\nnotstevenotstevenotsteve", view.render(path, name: 'notsteve')
 end
